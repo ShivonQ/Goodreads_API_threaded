@@ -11,12 +11,12 @@ def search_for_author(keyword):
 
 def search_book(keyword):
     book_data = ap.all_books_by_author(keyword)
-    print(book_data)
+    print("book-search", book_data)
 
 
 def search_book_title(keyword):
     book_data = ap.search(keyword)
-    print(book_data)
+    print("title-search ",book_data)
 
 
 def main():
