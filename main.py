@@ -1,4 +1,5 @@
-"""This class does the multi-threading with a single search keyword"""
+"""This class does the multi-threading with a single search keyword
+Three different API calls from one key-word search with multi-threading"""
 from Validator import *
 from goodreads_client import goodreads_client as ap
 import threading
