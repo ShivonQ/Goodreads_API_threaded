@@ -1,5 +1,4 @@
-"""This file will run the programs main loops, show the displays and generally
-   bring together the other files into a cohesive unit"""
+"""This class does the mutlithreading with a single search keyword"""
 from Validator import *
 from goodreads_client import goodreads_client as ap
 import threading
