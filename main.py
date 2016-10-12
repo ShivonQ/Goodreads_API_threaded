@@ -1,4 +1,4 @@
-"""This class does the mutlithreading with a single search keyword"""
+"""This class does the multi-threading with a single search keyword"""
 from Validator import *
 from goodreads_client import goodreads_client as ap
 import threading
@@ -16,7 +16,7 @@ def search_book(keyword):
 
 def search_book_title(keyword):
     book_data = ap.search(keyword)
-    print("title-search ",book_data)
+    print("title-search ", book_data)
 
 
 def main():
