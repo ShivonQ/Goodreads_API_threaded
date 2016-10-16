@@ -23,8 +23,29 @@ def search_book_title(search):
     with print_lock:
         print("I am the title_search \n", book_data)
 
+def search_for_author(name):
+    author_data = ap.author_by_name(name)
+    time.sleep(.5)
+    with print_lock:
+        print('I found {}, hopefully that was what you were looking for.'.format(author_data['name']))
+    #     must return the data so the next thread can use what was found.
+    return author_data
 
-def threader():
+
+def all_books_by_author(author_data):
+    book_data = ap.all_books_by_author(author_data['id'])
+    with print_lock:
+        for entry in book_data:
+            print(book_data)
+
+# I created another threader to isolate the book queue from the author queue
+def author_search_threader():
+    while True:
+        author_search = q.get()
+
+
+
+def book_search_threader():
     while True:
         # gets an worker from the queue
         searcher = q.get()
@@ -38,8 +59,8 @@ q = Queue()
 
 # how many threads are we going to allow for
 for x in range(5):
-    book_search = threading.Thread(name='book-search', target=threader)
-    author_search = threading.Thread(name='author_search', target=threader)
+    book_search = threading.Thread(name='book-search', target=book_search_threader)
+    author_search = threading.Thread(name='author_search', target=book_search_threader)
     # classifying as a daemon, so they will die when the main dies
     book_search.daemon = True
     author_search.daemon = True
@@ -49,6 +70,7 @@ for x in range(5):
 
 start = time.time()
 # list of random search string- can change it as per your choice
+# TODO: REPLACE THIS WITH USER INPUTS. AND A CHOICE TO DO THREADING OPTION 1 or 2
 search_string = ['Computer', 'Love', 'Music', 'Violence']
 for search in search_string:
     q.put(search)
