@@ -27,35 +27,37 @@ def search_book_title(search):
 
 def search_for_author(name):
     author_data = ap.author_by_name(name)
-    time.sleep(1)
     with print_lock:
         print('search_for_author Thread')
         print('I found {}, hopefully that was what you were looking for.'.format(author_data['name']))
     #     must return the data so the next thread can use what was found.
-    return author_data
-
+    # return author_data
+    q2.put(author_data)
+    q2.task_done()
 
 
 def find_all_books_by_author(author_data):
     time.sleep(.5)
     a_id = author_data['ID']
     book_data = ap.all_books_by_author(a_id)
+    time.sleep(.5)
     with print_lock:
         print('find_all_books_by_author Thread')
         for entry in book_data:
             print(entry)
-    q2.task_done()
+        q2.task_done()
 
 
 def author_search_threader():
     # I created another threader to isolate the book queue from the author queue
     while True:
         # fetch a thread targeted at this threader
-        author_search = q2.get()
+        author_searcher = q2.get()
         # catch the results of this first thread
-        auth_data = search_for_author(author_search)
+        search_for_author(author_searcher)
         # pass to the second thread
-        find_all_books_by_author(auth_data)
+        author_data = q2.get()
+        find_all_books_by_author(author_data)
         # alert queue that its done
         q2.task_done()
 
