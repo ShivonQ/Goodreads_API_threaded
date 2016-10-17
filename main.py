@@ -27,7 +27,7 @@ def search_book_title(search):
 
 def search_for_author(name):
     author_data = ap.author_by_name(name)
-    time.sleep(.5)
+    time.sleep(1)
     with print_lock:
         print('search_for_author Thread')
         print('I found {}, hopefully that was what you were looking for.'.format(author_data['name']))
@@ -35,26 +35,29 @@ def search_for_author(name):
     return author_data
 
 
+
 def find_all_books_by_author(author_data):
+    time.sleep(.5)
     a_id = author_data['ID']
     book_data = ap.all_books_by_author(a_id)
     with print_lock:
         print('find_all_books_by_author Thread')
         for entry in book_data:
-            print(book_data)
+            print(entry)
+    q2.task_done()
 
 
 def author_search_threader():
     # I created another threader to isolate the book queue from the author queue
     while True:
         # fetch a thread targeted at this threader
-        author_search = q.get()
+        author_search = q2.get()
         # catch the results of this first thread
         auth_data = search_for_author(author_search)
         # pass to the second thread
         find_all_books_by_author(auth_data)
         # alert queue that its done
-        q.task_done()
+        q2.task_done()
 
 
 def book_search_threader():
@@ -68,19 +71,20 @@ def book_search_threader():
         q.task_done()
 
 q = Queue()
+q2 = Queue()
 
 # how many threads are we going to allow for
 # TODO: put this whole threading portions into a function.
 # So whena  user gives input it runs either these threads or the author ones
-# for x in range(5):
-#     book_search = threading.Thread(name='book-search', target=book_search_threader)
-#     author_search = threading.Thread(name='author_search', target=book_search_threader)
-#     # classifying as a daemon, so they will die when the main dies
-#     book_search.daemon = True
-#     author_search.daemon = True
-#     # begins, must come after daemon definition
-#     book_search.start()
-#     author_search.start()
+for x in range(5):
+    book_search = threading.Thread(name='book-search', target=book_search_threader)
+    author_search = threading.Thread(name='author_search', target=book_search_threader)
+    # classifying as a daemon, so they will die when the main dies
+    book_search.daemon = True
+    author_search.daemon = True
+    # begins, must come after daemon definition
+    book_search.start()
+    author_search.start()
 
 for number in range(10):
     auth_by_name_thread = threading.Thread(name='author_search', target=author_search_threader)
@@ -98,13 +102,15 @@ start = time.time()
 # TODO: REPLACE THIS WITH USER INPUTS. AND A CHOICE TO DO THREADING OPTION 1 or 2
 search_string = ['Computer', 'Love', 'Music', 'Violence']
 author_search_list = ['J.R.R. Tolkien','Ian C. Esslemont','Steven Erikson', 'Brandon Sanderson']
-# for search in search_string:
-#     q.put(search)
+
+for search in search_string:
+    q.put(search)
 for param in author_search_list:
-    q.put(param)
+    q2.put(param)
 
 
 # wait until the thread terminates.
 q.join()
+q2.join()
 
 print('Entire job took:', time.time() - start)

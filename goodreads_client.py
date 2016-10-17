@@ -29,7 +29,7 @@ class goodreads_client():
     def all_books_by_author(auth_id):
         try:
             base_url = 'https://www.goodreads.com/series/list/'+auth_id+'.xml?key='+secret_key
-            response = requests.post(base_url)
+            response = requests.get(base_url)
             dict_form = ET.fromstring(response.text)
             results = parse_best_books(dict_form)
             return results
